@@ -103,125 +103,6 @@ birodalmak keretei között élő népeket.
 
 let konyvBetoltve = true;
 
-// A keresett konkrét lecke címe
-const keresettFejezetCim = 'A nemzeti eszme és a birodalmak kora';
-
-let aktivFejezet = {
-  cim: '',
-  szoveg: ''
-};
-
-let konyvBetoltve = false;
-
-async function betoltKeresettFejezetet() {
-  try {
-    const epub = new EPub(epubPath);
-    await epub.parse();
-
-    console.log('EPUB betöltve, keresett fejezet keresése...');
-
-    const keresettAlso = keresettFejezetCim.toLowerCase();
-    const blokkok = [];
-
-    for (let i = 0; i < epub.flow.length; i++) {
-      const chapter = epub.flow[i];
-
-      try {
-        const text = await epub.getChapter(chapter.id);
-        if (!text) continue;
-
-        const tisztitott = text
-          .replace(/<[^>]*>/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim();
-
-        if (!tisztitott) continue;
-
-        blokkok.push({
-          cim: chapter.title || '',
-          szoveg: tisztitott
-        });
-      } catch (err) {
-        console.error(`Fejezet olvasási hiba (${chapter.id}):`, err);
-      }
-    }
-
-    let startIndex = -1;
-
-    for (let i = 0; i < blokkok.length; i++) {
-      const blokk = blokkok[i];
-      const cimAlso = blokk.cim.toLowerCase();
-      const szovegAlso = blokk.szoveg.toLowerCase();
-
-      const tartalomBlokk =
-        cimAlso.includes('tartalom') ||
-        szovegAlso.startsWith('tartalom ') ||
-        szovegAlso.includes(' tartalom ');
-
-      if (tartalomBlokk) {
-        console.log('Kihagyva (tartalomjegyzék):', blokk.cim || '[nincs cím]');
-        continue;
-      }
-
-      if (
-        cimAlso.includes(keresettAlso) ||
-        szovegAlso.includes(keresettAlso)
-      ) {
-        startIndex = i;
-        console.log('Megtalált valódi fejezet kezdete:', blokk.cim || '[nincs cím]');
-        break;
-      }
-    }
-
-    if (startIndex === -1) {
-      console.log('Nem találtam meg a keresett fejezetcímet:', keresettFejezetCim);
-      return;
-    }
-
-    let osszegyujtott = [];
-    let osszHossz = 0;
-    const maxKarakter = 15000;
-
-    for (let i = startIndex; i < blokkok.length; i++) {
-      const blokk = blokkok[i];
-
-      const cimAlso = blokk.cim.toLowerCase();
-      const szovegAlso = blokk.szoveg.toLowerCase();
-
-      const tartalomBlokk =
-        cimAlso.includes('tartalom') ||
-        szovegAlso.startsWith('tartalom ') ||
-        szovegAlso.includes(' tartalom ');
-
-      if (tartalomBlokk) {
-        continue;
-      }
-
-      osszegyujtott.push(blokk.szoveg);
-      osszHossz += blokk.szoveg.length;
-
-      if (osszHossz >= maxKarakter) {
-        break;
-      }
-    }
-
-    aktivFejezet = {
-      cim: keresettFejezetCim,
-      szoveg: osszegyujtott.join('\n\n')
-    };
-
-    konyvBetoltve = true;
-
-    console.log('Keresett fejezet betöltve:', aktivFejezet.cim);
-    console.log('Karakterhossz:', aktivFejezet.szoveg.length);
-    console.log('Preview:', aktivFejezet.szoveg.substring(0, 500));
-  } catch (err) {
-    console.error('EPUB hiba:', err);
-  }
-}
-
-betoltKeresettFejezetet();
-
 app.get('/api/chapter', (req, res) => {
   res.json({
     chapterTitle: aktivFejezet.cim,
@@ -250,9 +131,7 @@ app.post('/api/ask', async (req, res) => {
       return res.status(503).json({ error: 'A könyv még töltődik.' });
     }
 
-    const kontextus = aktivFejezet.szoveg;
-
-    const prompt = `
+    const prompt =`
 Az alábbi tankönyvi részlet alapján válaszolj röviden, érthetően, magyarul.
 Csak a forrás alapján válaszolj.
 Ha a válasz nem állapítható meg a forrásból, azt mondd meg.
@@ -265,7 +144,7 @@ ${kontextus}
 
 KÉRDÉS:
 ${question}
-    `;
+     `;
 
     const start = Date.now();
 
