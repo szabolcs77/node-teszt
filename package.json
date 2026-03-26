@@ -1,0 +1,12 @@
+{
+  "name": "esp32-node-test",
+  "version": "1.0.0",
+  "main": "app.js",
+  "type": "module",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "cors": "^2.8.6",
+    "epub": "^2.1.1",
+    "express": "^5.2.1"
+  }
+}
