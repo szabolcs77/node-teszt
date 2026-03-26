@@ -1,4 +1,3 @@
-//const API_KEY = "AIzaSyAUP7RiJd68TkSIg8TfN12R4CZR237Qa5g"; 
 import express from 'express';
 import cors from 'cors';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -14,12 +13,95 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Gemini
-const API_KEY = 'AIzaSyAUP7RiJd68TkSIg8TfN12R4CZR237Qa5g';
+const API_KEY = process.env.GEMINI_API_KEY;
+if (!API_KEY) {
+  console.error('Hiányzik a GEMINI_API_KEY környezeti változó.');
+  process.exit(1);
+}
 const genAI = new GoogleGenerativeAI(API_KEY);
 const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
 
+
+
 // EPUB
-const epubPath = path.join(__dirname, 'OH-TOR07TA.epub');
+let aktivFejezet = {
+  cim: 'Teszt fejezet',
+  szoveg: `
+"A nemzeti eszme és a birodalmak kora
+Bonaparte Napóleon katonai vereségét követően a győztes nagyhatalmak – a Habsburg Birodalom, a poroszok
+és az oroszok – arra törekedtek, hogy megteremtsék a dinasztikus alapokon nyugvó birodalmak
+hatalmi egyensúlyát Európában. Nagy-Britannia számára is fontos volt a kontinentális erőegyensúly kialakítása.
+A francia forradalom során azonban számos olyan eszme született, amely a 19. században új szervezőerőként
+lépett fel, és megváltoztatta a politika és a nemzetközi kapcsolatok világát.
+..Miért volt fontos korszakhatár 1789
+és 1815 az európai történelemben?
+..Melyek voltak az első ipari forradalom
+legfontosabb találmányai?
+. Lengyelország nemzeti
+himnusza
+„Nincs még veszve Lengyelország,
+Míg mi meg nem haltunk,
+Hogyha földünk elrabolták,
+Visszaszerzi kardunk.
+Fel, fel Dąbrowski,
+Zászlódat bontsd ki!
+Ha te vagy vezérünk,
+Népünkhöz elérünk.”
+Jan Henryk Dąbrowski lengyel tábornok
+Bonaparte Napóleon hadaiban szervezett
+egy lengyel légiót. Fő törekvése az volt,
+hogy az oroszok, a poroszok és a Habsburgok
+által 1795-ben feldarabolt Lengyelországnak
+visszahozza a függetlenséget.
+..Hogyan fejezi ki a lengyel himnusz szövege
+az országot ért sorscsapást?
+..Hogyan próbált reményt adni?
+. A Himnusz és a Szózat
+A Himnusz és a Szózat a 19. században
+a nemzeti sorskérdések, a történelem és
+a nemzeti megmaradás kérdéskörét tárgyalva
+született meg.
+..Olvasd el újra Kölcsey Ferenc és Vörösmarty
+Mihály művét! Gondold végig,
+és beszéljétek meg, hogyan jelenik
+meg benne a nemzeti eszme, a történelmi
+múltunk!
+A nemzeti eszme kibontakozása
+A nemzet (latinul natio) kifejezés alatt évszázadokon keresztül
+a nemességet értették a rendi társadalmakban. Ez a
+szemléletmód az újkorban átalakult. Először az 1789-es
+francia forradalom során jelent meg egy új nemzeteszme,
+amelyben mindenki része lett a francia nemzetnek, és mindenki
+számára fontossá vált a nemzet szabadsága és megerősödése.
+Mindemellett a nemzeti sorscsapások, illetve a
+nemzet jövőjének féltése is életre hívta a nemzeti összetartozás
+új érzését a korszakban. Ilyen volt például a 18. század
+végén a nagyhatalmi szomszédjai által feldarabolt lengyel
+nép körében a függetlenség ., valamint a reformkori Magyarországon
+a nemzeti megújulás kérdése.
+..Miért erősödött meg a nemzeti összetartozás érzése ebben az
+időszakban?
+A szabad egyénekből álló nemzet és a független, önálló
+nemzetállam megteremtése más népek számára is vonzó
+példává vált. Egyre többen vallották azt, hogy a nemzethez
+való tartozás érzése az emberi élet alapvető értéke. Úgy gondolták,
+hogy a saját nemzeti közösség felemelése és védelme
+mindenkinek kötelessége, függetlenül az egyén társadalmi
+helyzetétől, vallásától vagy politikai nézeteitől. Ezt az
+eszmerendszert nevezzük nacionalizmusnak. A nemzeti
+együvé tartozás érzésének kialakulásában általában fontos
+szerepet játszott a közös nyelv és kultúra, a nemzetre jellemző
+szokások ápolása, valamint a közösség által megőrzött
+mítoszok és a közös történelem. Ekkoriban teremtődtek
+meg a ma is ismert nemzeti jelképek: a nemzeti himnuszok,
+címerek és zászlók. . A 19. században az összetartozás tudata
+egyre inkább áthatotta az egymástól elkülönülten, régi
+birodalmak keretei között élő népeket.
+..Mit akartak kiharcolni más nemzetek is?
+..Milyen tényezők erősítik a nemzeti érzés kialakulását?`
+};
+
+let konyvBetoltve = true;
 
 // A keresett konkrét lecke címe
 const keresettFejezetCim = 'A nemzeti eszme és a birodalmak kora';
@@ -207,6 +289,8 @@ ${question}
   }
 });
 
-app.listen(3000, '0.0.0.0', () => {
-  console.log('Node fut: http://localhost:3000');
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Node fut: http://0.0.0.0:${PORT}`);
 });
